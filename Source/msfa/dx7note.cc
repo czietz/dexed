@@ -58,7 +58,7 @@ int32_t Dx7Note::osc_freq(int midinote, int mode, int coarse, int fine, int detu
         }
 
         // could use more precision, closer enough for now. those numbers comes from my DX7
-        double detuneRatio = 0.0209 * exp(-0.396 * (((float)logfreq)/(1<<24))) / 7;
+        double detuneRatio = 0.0209 * exp2(-0.396 * (((float)logfreq)/(1<<24))) / 7;
         logfreq += detuneRatio * logfreq * (detune - 7);
         
         logfreq += coarsemul[coarse & 31];

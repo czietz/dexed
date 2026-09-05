@@ -52,17 +52,14 @@ jobs:
     needs: [ component_version ]
 
     steps:
-    - uses: awalsh128/cache-apt-pkgs-action@latest
-      if: runner.os == 'linux'
-      with:
-        packages: libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev ccache xvfb libjack-dev libsndfile-dev
-
     - uses: actions/checkout@v4
       with:
          submodules: recursive
 
     - name: Build
       run: |
+        sudo apt update
+        sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev ccache xvfb libjack-dev libsndfile-dev
         cmake -S . -B ./build -DCMAKE_BUILD_TYPE=${{ needs.component_version.outputs.build_type }} -DBUILD_ID=${{ needs.component_version.outputs.build_version }} -DJUCE_COPY_PLUGIN_AFTER_BUILD=FALSE
         cmake --build ./build --config ${{ needs.component_version.outputs.build_type }} --target installer --parallel 3
 
@@ -109,20 +106,8 @@ jobs:
       with:
          submodules: recursive
 
-    - uses: apple-actions/import-codesign-certs@v3
-      if: runner.os == 'macOS'
-      with:
-        p12-file-base64: ${{ secrets.MAC_CERTS_P12 }}
-        p12-password: ${{ secrets.MAC_CERT_PWD }}
-
     - name: Build
       run: |
-        export MAC_SIGNING_CERT="${{ secrets.MAC_SIGNING_CERT }}"
-        export MAC_INSTALLING_CERT="${{ secrets.MAC_INSTALLING_CERT }}"
-        export MAC_SIGNING_ID="${{ secrets.MAC_SIGNING_ID }}"
-        export MAC_TEAM_ID="${{ secrets.MAC_TEAM_ID }}"
-        export MAC_TEAM_PASSWORD="${{ secrets.MAC_TEAM_PASSWORD }}"
-
         cmake -S . -B ./build -DCMAKE_BUILD_TYPE=${{ needs.component_version.outputs.build_type }} -DBUILD_ID=${{ needs.component_version.outputs.build_version }} -DJUCE_COPY_PLUGIN_AFTER_BUILD=FALSE
         cmake --build ./build --config ${{ needs.component_version.outputs.build_type }} --target installer --parallel 3
 
